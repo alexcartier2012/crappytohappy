@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C2C Resume Tailor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Carlito:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f4f6; --panel:#ffffff; --ink:#111827; --muted:#6b7280; --line:#e5e7eb;
+  --accent:#1f3864; --accent-ink:#ffffff; --accent-soft:#e8edf6;
+  --good:#166534; --good-soft:#dcfce7; --warn:#92400e; --warn-soft:#fef3c7; --bad:#991b1b; --bad-soft:#fee2e2;
+  --field:#f9fafb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1115; --panel:#181b21; --ink:#e5e7eb; --muted:#9ca3af; --line:#2a2f38;
+    --accent:#7fa2e0; --accent-ink:#0f1115; --accent-soft:#1d2738;
+    --good:#86efac; --good-soft:#14301f; --warn:#fcd34d; --warn-soft:#33280f; --bad:#fca5a5; --bad-soft:#3a1717;
+    --field:#12151a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1115; --panel:#181b21; --ink:#e5e7eb; --muted:#9ca3af; --line:#2a2f38;
+  --accent:#7fa2e0; --accent-ink:#0f1115; --accent-soft:#1d2738;
+  --good:#86efac; --good-soft:#14301f; --warn:#fcd34d; --warn-soft:#33280f; --bad:#fca5a5; --bad-soft:#3a1717;
+  --field:#12151a;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+header.top h1{font-size:17px;margin:0;font-weight:700;letter-spacing:-.01em}
+header.top h1 span{color:var(--muted);font-weight:500}
+.wrap{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:20px;padding:20px;max-width:1500px;margin:0 auto}
+@media (max-width:980px){.wrap{grid-template-columns:1fr;padding:16px}}
+.wrap > section{min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.card + .card{margin-top:16px}
+label.lbl{display:block;font-weight:600;font-size:13px;margin:0 0 6px}
+.hint{color:var(--muted);font-size:12px}
+textarea,input[type=text],input[type=password],select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:9px 10px;outline:none}
+textarea:focus,input:focus,select:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:120px;font-size:13px}
+.field{margin-bottom:14px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row > *{flex:1}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:14px;text-align:center;cursor:pointer;color:var(--muted);margin-bottom:8px;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+.drop strong{color:var(--ink)}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn.primary:disabled{opacity:.6;cursor:wait}
+.btn.big{width:100%;padding:11px;font-size:15px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:7px 12px;cursor:pointer}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.check{display:flex;gap:8px;align-items:center;font-size:13px;margin:4px 0}
+.status{margin-top:10px;font-size:13px;min-height:20px}
+.status.err{color:var(--bad)}
+.out-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tabs{display:inline-flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:3px}
+.tabs button{border:0;background:transparent;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:500;color:var(--muted)}
+.tabs button.on{background:var(--accent-soft);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:48px 20px;text-align:center;color:var(--muted);background:var(--panel)}
+.empty h2{color:var(--ink);font-size:16px;margin:0 0 6px}
+.paper-scroll{overflow-x:auto;padding-bottom:8px}
+.pagecount{font-size:12px;color:var(--muted)}
+.pagecount.over{color:var(--bad);font-weight:600}
+
+/* Resume paper: always light, sized like US Letter */
+.paper{width:8.5in;min-height:11in;margin:0 auto;background:#fff;color:#111;padding:.5in .6in;box-shadow:0 1px 3px rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.08);
+  font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;font-size:10pt;line-height:1.25;position:relative;
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(11in - 1px),rgba(200,40,40,.35) calc(11in - 1px),rgba(200,40,40,.35) 11in)}
+.paper [contenteditable]{outline:none;border-radius:2px}
+.paper [contenteditable]:hover{background:#f2f5fb}
+.paper [contenteditable]:focus{background:#eaf0fb;box-shadow:0 0 0 1px #9db3dd}
+.r-name{text-align:center;font-size:16pt;font-weight:700;color:#1f3864;margin:0}
+.r-title{text-align:center;font-size:11pt;margin:0}
+.r-sub{text-align:center;font-size:9pt;color:#555;margin:0 0 4pt}
+.r-sub .sep{color:#999;padding:0 6px}
+.r-h{font-size:11pt;font-weight:700;color:#1f3864;text-transform:uppercase;border-bottom:.75pt solid #1f3864;margin:8pt 0 3pt;padding-bottom:1pt}
+.r-p{margin:0 0 2pt}
+.r-skill{margin:0 0 1pt}
+.r-skill b{font-weight:700}
+.r-job{margin-top:5pt}
+.r-jobhead{display:flex;justify-content:space-between;gap:12px;font-weight:700}
+.r-meta{font-style:italic;color:#555;margin:0 0 1pt}
+.r-ul{margin:0;padding-left:15pt}
+.r-ul li{margin:0 0 1pt;position:relative}
+.r-env{font-size:9pt;margin:1pt 0}
+.del{position:absolute;left:-30pt;top:0;border:0;background:#fee2e2;color:#991b1b;border-radius:4px;font-size:10px;line-height:1;padding:3px 5px;cursor:pointer;opacity:0;font-family:Inter,sans-serif}
+li:hover > .del,.r-skill:hover > .del{opacity:1}
+.r-skill{position:relative}
+
+/* Notes */
+.notes .verdict{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:8px;margin-bottom:14px}
+.pill{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.v-strong{background:var(--good-soft)}.v-strong .pill{background:var(--good);color:var(--panel)}
+.v-partial{background:var(--warn-soft)}.v-partial .pill{background:var(--warn);color:var(--panel)}
+.v-weak{background:var(--bad-soft)}.v-weak .pill{background:var(--bad);color:var(--panel)}
+.notes h3{font-size:13px;margin:16px 0 6px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.notes ul{margin:0;padding-left:18px}
+.notes li{margin:3px 0}
+.reqtable{width:100%;border-collapse:collapse;font-size:13px}
+.reqtable th,.reqtable td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.reqtable th{color:var(--muted);font-weight:600;font-size:12px}
+.tag{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;white-space:nowrap}
+.t-yes{background:var(--good-soft);color:var(--good)}.t-partial{background:var(--warn-soft);color:var(--warn)}.t-no{background:var(--bad-soft);color:var(--bad)}
+.table-scroll{overflow-x:auto}
+
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:20px;width:min(520px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog h2{margin:0 0 12px;font-size:16px}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:4px 16px 24px}
+
+@media print{
+  body{background:#fff}
+  header.top,.inputs,.out-head,footer,.notes-pane,.del,.status{display:none!important}
+  .wrap{display:block;padding:0}
+  .paper{box-shadow:none;width:auto;min-height:0;padding:0;background-image:none}
+  .paper [contenteditable]:hover,.paper [contenteditable]:focus{background:none;box-shadow:none}
+  @page{size:letter;margin:.5in .6in}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>C2C Resume Tailor <span>· client-ready in one pass</span></h1>
+  <button class="btn" id="openSettings">⚙ AI settings</button>
+</header>
+
+<div class="wrap">
+  <!-- INPUTS -->
+  <section class="inputs">
+    <div class="card">
+      <div class="field">
+        <label class="lbl">Candidate resume</label>
+        <div class="drop" id="drop"><strong>Drop a PDF, DOCX or TXT</strong> or click to browse<br><span class="hint">or paste the text below</span></div>
+        <input type="file" id="file" accept=".pdf,.docx,.txt,.md" hidden>
+        <textarea id="resume" rows="8" placeholder="Resume text appears here after upload. You can also paste it in."></textarea>
+        <div class="hint" id="resumeInfo"></div>
+      </div>
+      <div class="field">
+        <label class="lbl" for="jd">Job description</label>
+        <textarea id="jd" rows="8" placeholder="Paste the client's job description"></textarea>
+      </div>
+      <div class="field">
+        <label class="lbl" for="notes">Your notes <span class="hint">(optional)</span></label>
+        <textarea id="notes" rows="3" style="min-height:70px" placeholder="e.g. US citizen, available 2 weeks, emphasize Kafka work, client wants 1 page"></textarea>
+      </div>
+      <div class="field row">
+        <div>
+          <label class="lbl" for="label">Client / role for file name</label>
+          <input type="text" id="label" placeholder="e.g. Walmart_DataEng">
+        </div>
+        <div style="flex:0 0 auto">
+          <label class="lbl">Length</label>
+          <div class="seg" id="pages"><button data-v="1">1 page</button><button data-v="2" class="on">2 pages</button></div>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="contact"> Keep candidate contact info (phone, email, LinkedIn)</label>
+      <div style="margin-top:14px"><button class="btn primary big" id="go">Tailor resume</button></div>
+      <div class="status" id="status"></div>
+    </div>
+  </section>
+
+  <!-- OUTPUT -->
+  <section>
+    <div class="out-head">
+      <div class="tabs" id="tabs"><button data-t="resume" class="on">Client resume</button><button data-t="notes">Recruiter notes</button></div>
+      <div class="actions" id="actions" hidden>
+        <span class="pagecount" id="pagecount"></span>
+        <button class="btn" id="copyTxt">Copy text</button>
+        <button class="btn" id="printPdf">Save PDF</button>
+        <button class="btn primary" id="dlDocx">Download .docx</button>
+      </div>
+    </div>
+    <div id="resumePane">
+      <div class="empty" id="emptyState"><h2>Your client-ready resume shows up here</h2>Upload a resume, paste the JD and click <b>Tailor resume</b>. You can click any text in the result to edit it before downloading.</div>
+      <div class="paper-scroll" id="paperWrap" hidden><div class="paper" id="paper"></div></div>
+    </div>
+    <div class="notes-pane" id="notesPane" hidden>
+      <div class="card notes" id="notesBody"></div>
+      <div style="margin-top:10px"><button class="btn" id="copyNotes">Copy notes</button></div>
+    </div>
+  </section>
+</div>
+
+<footer>Nothing is stored on a server. Resume text goes straight from this browser to the AI provider you pick, and your API key stays in this browser only.</footer>
+
+<dialog id="settings">
+  <h2>AI settings</h2>
+  <div class="field">
+    <label class="lbl">Provider</label>
+    <div class="seg" id="provider"><button data-v="claude" class="on">Claude (Anthropic)</button><button data-v="gemini">Gemini (Google)</button></div>
+  </div>
+  <div class="field">
+    <label class="lbl" for="apikey">API key</label>
+    <input type="password" id="apikey" autocomplete="off" placeholder="Paste your API key">
+    <div class="hint" id="keyHint"></div>
+  </div>
+  <div class="field">
+    <label class="lbl" for="model">Model</label>
+    <div class="row"><input type="text" id="model" list="modelList"><button class="btn" id="loadModels" style="flex:0 0 auto">Load models</button></div>
+    <datalist id="modelList"></datalist>
+    <div class="hint" id="modelHint"></div>
+  </div>
+  <label class="check"><input type="checkbox" id="remember" checked> Remember key on this device</label>
+  <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn primary" id="saveSettings" style="flex:0 0 auto">Save</button></div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js"></script>
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+
+/* ---------- storage (best effort) ---------- */
+const store = {
+  get(k, d = '') { try { const v = localStorage.getItem('rt_' + k); return v === null ? d : v; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('rt_' + k, v); } catch {} },
+  del(k) { try { localStorage.removeItem('rt_' + k); } catch {} },
+};
+
+/* ---------- settings ---------- */
+const DEFAULT_MODEL = { claude: 'claude-sonnet-5-5', gemini: 'gemini-2.5-pro' };
+const KEY_HINT = {
+  claude: 'Get one at console.anthropic.com → API keys.',
+  gemini: 'Get one at aistudio.google.com → Get API key.',
+};
+const cfg = {
+  provider: store.get('provider', 'claude'),
+  key: { claude: store.get('key_claude'), gemini: store.get('key_gemini') },
+  model: { claude: store.get('model_claude', DEFAULT_MODEL.claude), gemini: store.get('model_gemini', DEFAULT_MODEL.gemini) },
+};
+let draftProvider = cfg.provider;
+
+function segSet(el, v) { el.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
+function fillSettings() {
+  segSet($('#provider'), draftProvider);
+  $('#apikey').value = cfg.key[draftProvider] || '';
+  $('#model').value = cfg.model[draftProvider] || DEFAULT_MODEL[draftProvider];
+  $('#keyHint').textContent = KEY_HINT[draftProvider];
+  $('#modelList').innerHTML = '';
+  $('#modelHint').textContent = 'Click "Load models" to see what your key can use.';
+}
+$('#openSettings').onclick = () => { draftProvider = cfg.provider; fillSettings(); $('#settings').showModal(); };
+$('#provider').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  cfg.key[draftProvider] = $('#apikey').value.trim();
+  cfg.model[draftProvider] = $('#model').value.trim();
+  draftProvider = b.dataset.v; fillSettings();
+};
+$('#saveSettings').onclick = () => {
+  cfg.provider = draftProvider;
+  cfg.key[draftProvider] = $('#apikey').value.trim();
+  cfg.model[draftProvider] = $('#model').value.trim() || DEFAULT_MODEL[draftProvider];
+  store.set('provider', cfg.provider);
+  store.set('model_' + draftProvider, cfg.model[draftProvider]);
+  if ($('#remember').checked) { store.set('key_claude', cfg.key.claude || ''); store.set('key_gemini', cfg.key.gemini || ''); }
+  else { store.del('key_claude'); store.del('key_gemini'); }
+  $('#settings').close();
+  setStatus('');
+};
+$('#loadModels').onclick = async () => {
+  const key = $('#apikey').value.trim();
+  if (!key) { $('#modelHint').textContent = 'Paste your API key first.'; return; }
+  $('#modelHint').textContent = 'Loading…';
+  try {
+    let ids = [];
+    if (draftProvider === 'claude') {
+      const r = await fetch('https://api.anthropic.com/v1/models?limit=100', { headers: claudeHeaders(key) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error?.message || r.status);
+      ids = j.data.map(m => m.id);
+    } else {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': key } });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error?.message || r.status);
+      ids = j.models.filter(m => (m.supportedGenerationMethods || []).includes('generateContent')).map(m => m.name.replace(/^models\//, ''));
+    }
+    $('#modelList').innerHTML = ids.map(i => `<option value="${i}">`).join('');
+    $('#modelHint').textContent = ids.length ? `${ids.length} models available. Click the box to pick one. A "pro" or "sonnet/opus" model gives the best rewrites.` : 'No models returned.';
+  } catch (e) { $('#modelHint').textContent = 'Could not load models: ' + e.message; }
+};
+
+/* ---------- inputs ---------- */
+let pages = '2';
+$('#pages').onclick = e => { const b = e.target.closest('button'); if (!b) return; pages = b.dataset.v; segSet($('#pages'), pages); };
+$('#notes').value = '';
+['jd', 'label'].forEach(id => { $('#' + id).value = store.get('last_' + id); $('#' + id).addEventListener('input', e => store.set('last_' + id, e.target.value)); });
+
+const drop = $('#drop'), fileInput = $('#file');
+drop.onclick = () => fileInput.click();
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]); };
+fileInput.onchange = () => { if (fileInput.files[0]) readFile(fileInput.files[0]); fileInput.value = ''; };
+
+if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+let scannedPdf = null; // base64 of an image-only PDF, sent to the AI as a file
+$('#resume').addEventListener('input', () => { if (scannedPdf && $('#resume').value.trim()) { scannedPdf = null; $('#resumeInfo').textContent = 'Using the pasted text.'; } });
+
+function toB64(buf) {
+  let s = ''; const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+async function readFile(f) {
+  const name = f.name.toLowerCase();
+  $('#resumeInfo').textContent = 'Reading ' + f.name + '…';
+  scannedPdf = null; setStatus('');
+  try {
+    let text = '';
+    if (name.endsWith('.pdf')) {
+      const buf = await f.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf.slice(0) }).promise;
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const tc = await (await pdf.getPage(p)).getTextContent();
+        text += tc.items.map(i => i.str + (i.hasEOL ? '\n' : '')).join('') + '\n\n';
+      }
+      text = text.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n');
+      $('#resumeInfo').textContent = `${f.name} · ${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''}`;
+      if (text.trim().length < 50) {
+        if (buf.byteLength > 20 * 1024 * 1024) throw new Error('This PDF is a scanned image and too large to send (over 20 MB). Paste the text instead.');
+        scannedPdf = toB64(buf);
+        $('#resume').value = '';
+        $('#resumeInfo').textContent = `${f.name} · scanned/image PDF (no text layer). It will be sent to the AI as a file, which works fine.`;
+        return;
+      }
+    } else if (name.endsWith('.docx')) {
+      const res = await mammoth.extractRawText({ arrayBuffer: await f.arrayBuffer() });
+      text = res.value.replace(/\n{3,}/g, '\n\n');
+      $('#resumeInfo').textContent = f.name;
+    } else if (name.endsWith('.doc')) {
+      throw new Error('Old .doc files can\'t be read here. Open it in Word, save as .docx or PDF, or paste the text.');
+    } else {
+      text = await f.text(); $('#resumeInfo').textContent = f.name;
+    }
+    if (text.trim().length < 50) throw new Error('Very little text found. If this is a scanned PDF, copy the text out and paste it instead.');
+    $('#resume').value = text.trim();
+  } catch (e) { $('#resumeInfo').textContent = ''; setStatus(e.message, true); }
+}
+
+/* ---------- prompt ---------- */
+const SYSTEM = `You are an expert resume editor for an IT staffing agency. You turn bloated vendor / C2C resumes (often 5-10 pages, giant skills tables, 20-35 bullets per "Client:" project) into a clean, client-ready resume tailored to one job description, plus private notes for the recruiter.
+
+HARD RULES (honesty - never break these)
+- Never add anything that is not in the source resume: no new skills, tools, metrics, titles, employers, dates, certifications or degrees. Rewording, condensing, merging duplicates and cutting are fine.
+- Never change dates, job titles, or employer/client names.
+- Keep every role so there are no fake gaps. Relevant roles get 4-7 bullets; older or irrelevant roles shrink to 1-3 bullets (one short bullet for very old roles).
+- Years of experience must be computed from the role dates where the skill actually appears in project bullets, not from the summary's claims. If the resume claims more than the dates support, use the dates-supported number and flag the discrepancy in the notes.
+- A skill that appears only in the skills table (never in any project) may go in skills only if the JD asks for it, and must be flagged in notes as "skills-list only - verify".
+- Contact info (phone, email, LinkedIn, street address) is removed unless the recruiter asks to keep it. Keep city/state and work authorization if stated on the resume.
+- Keep metrics exactly as written in the source.
+
+WRITING RULES
+- title: the candidate's real title, lightly aligned to the JD (e.g. "QA Automation Engineer - Mobile & Web"). Never a title they didn't hold in substance.
+- summary: one paragraph, 60-90 words. Total years, plus 2-3 JD-critical skills with years. No fluff words ("results-driven", "passionate", "rockstar", "proven track record").
+- skills: 5-8 grouped lines ordered by JD importance, only JD-relevant tools. Drop everything else.
+- experience: most recent first. Bullets lead with JD-relevant work, keep real metrics, cut generic duty bullets ("participated in daily standups"). One idea per bullet, max ~2 lines (~200 characters). For vendor-style roles keep "client" (end client) and "company" (employer/vendor) if both are given. Add "environment" only if helpful, trimmed to relevant tools.
+- education / certifications: as listed in the source.
+- Plain, factual wording.
+
+LENGTH
+At 10pt font: a 1-page resume holds roughly a summary, 5-6 skill lines and 14-18 bullets in total. A 2-page resume holds roughly 30-36 bullets in total. Never exceed the requested length; cut older-role bullets first, then trim skills.
+
+RECRUITER NOTES (never shown to the client)
+- fit: "Strong", "Partial" or "Weak", with a one-sentence verdict.
+- requirements: each JD must-have and important nice-to-have, with match "yes" | "partial" | "no", the evidence (role and years from dates), kept short.
+- gaps: must-haves missing or under the required years (give the dates-based number).
+- red_flags: skills-list-only claims, overlapping or inconsistent dates, bullets copied word-for-word from the JD, summary claims the dates don't support, very short stints, employment gaps, anything else odd.
+- questions: 3-5 screening questions aimed at the gaps.
+- cut: one line on what was removed.
+
+OUTPUT
+Return ONLY valid JSON (no markdown fences, no commentary) in exactly this shape:
+{
+  "name": "First Last",
+  "title": "Role Title",
+  "location": "City, ST",
+  "work_authorization": "",
+  "contact": [],
+  "summary": "",
+  "skills": [{"label": "Category", "items": "Tool, Tool, Tool"}],
+  "experience": [{"title": "", "company": "", "client": "", "location": "", "dates": "Mon YYYY - Present", "bullets": [""], "environment": ""}],
+  "certifications": [],
+  "education": ["Degree - School, Year"],
+  "notes": {
+    "fit": "Strong|Partial|Weak",
+    "verdict": "",
+    "requirements": [{"requirement": "", "match": "yes|partial|no", "evidence": ""}],
+    "gaps": [""],
+    "red_flags": [""],
+    "questions": [""],
+    "cut": ""
+  }
+}
+Leave a field as "" or [] when the source doesn't have it.`;
+
+function userPrompt() {
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  return `Today's date: ${today} (use it for "Present" when computing years).
+Requested length: ${pages} page${pages === '1' ? '' : 's'} maximum.
+Contact info: ${$('#contact').checked ? 'KEEP the candidate\'s phone, email and LinkedIn in "contact".' : 'REMOVE - leave "contact" empty.'}
+
+<job_description>
+${$('#jd').value.trim()}
+</job_description>
+
+<recruiter_notes>
+${$('#notes').value.trim() || '(none)'}
+</recruiter_notes>
+
+<candidate_resume>
+${scannedPdf ? '(The candidate resume is the attached PDF document. Read it carefully, including any tables.)' : $('#resume').value.trim()}
+</candidate_resume>`;
+}
+
+/* ---------- AI calls ---------- */
+function claudeHeaders(key) {
+  return { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true', 'content-type': 'application/json' };
+}
+async function callClaude(key, model) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST', headers: claudeHeaders(key),
+    body: JSON.stringify({ model, max_tokens: 12000, temperature: 0.2, system: SYSTEM, messages: [{ role: 'user', content: scannedPdf
+      ? [{ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: scannedPdf } }, { type: 'text', text: userPrompt() }]
+      : userPrompt() }] }),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(friendly(r.status, j.error?.message));
+  if (j.stop_reason === 'max_tokens') throw new Error('The AI ran out of room before finishing. Try again, or pick the 1-page option.');
+  return (j.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
+}
+async function callGemini(key, model) {
+  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+    method: 'POST', headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM }] },
+      contents: [{ role: 'user', parts: [...(scannedPdf ? [{ inline_data: { mime_type: 'application/pdf', data: scannedPdf } }] : []), { text: userPrompt() }] }],
+      generationConfig: { temperature: 0.2, maxOutputTokens: 32000, responseMimeType: 'application/json' },
+    }),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(friendly(r.status, j.error?.message));
+  const cand = (j.candidates || [])[0];
+  if (!cand) throw new Error('No answer came back' + (j.promptFeedback?.blockReason ? ' (blocked: ' + j.promptFeedback.blockReason + ')' : '') + '.');
+  if (cand.finishReason === 'MAX_TOKENS') throw new Error('The AI ran out of room before finishing. Try again, or pick the 1-page option.');
+  return (cand.content?.parts || []).map(p => p.text || '').join('');
+}
+function friendly(status, msg) {
+  if (status === 401 || status === 403) return 'The API key was rejected. Check it in AI settings. (' + (msg || status) + ')';
+  if (status === 404) return 'That model wasn\'t found. Open AI settings and click "Load models" to pick one. (' + (msg || status) + ')';
+  if (status === 429) return 'Rate limit or quota hit. Wait a minute and try again. (' + (msg || status) + ')';
+  return 'AI request failed: ' + (msg || ('HTTP ' + status));
+}
+function parseJSON(text) {
+  let t = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a < 0 || b < a) throw new Error('The AI answer wasn\'t in the expected format. Try again.');
+  return JSON.parse(t.slice(a, b + 1));
+}
+function normalize(r) {
+  const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
+  r.contact = arr(r.contact); r.skills = arr(r.skills); r.experience = arr(r.experience);
+  r.certifications = arr(r.certifications); r.education = arr(r.education);
+  r.experience.forEach(e => { e.bullets = arr(e.bullets); });
+  r.notes = r.notes || {};
+  ['requirements', 'gaps', 'red_flags', 'questions'].forEach(k => r.notes[k] = arr(r.notes[k]));
+  return r;
+}
+
+let R = null;
+let timer = null;
+function setStatus(msg, err) { const s = $('#status'); s.textContent = msg; s.classList.toggle('err', !!err); }
+
+$('#go').onclick = async () => {
+  if (!$('#resume').value.trim() && !scannedPdf) return setStatus('Add the candidate resume first.', true);
+  if (!$('#jd').value.trim()) return setStatus('Paste the job description first.', true);
+  const key = cfg.key[cfg.provider];
+  if (!key) { draftProvider = cfg.provider; fillSettings(); $('#settings').showModal(); return setStatus('Add your API key to get started.', true); }
+  const btn = $('#go'); btn.disabled = true;
+  const t0 = Date.now();
+  const tick = () => setStatus(`Tailoring with ${cfg.provider === 'claude' ? 'Claude' : 'Gemini'}… ${Math.round((Date.now() - t0) / 1000)}s (usually 30–90s)`);
+  tick(); timer = setInterval(tick, 1000);
+  try {
+    const raw = cfg.provider === 'claude' ? await callClaude(key, cfg.model.claude) : await callGemini(key, cfg.model.gemini);
+    R = normalize(parseJSON(raw));
+    renderAll();
+    setStatus('Done. Click any text in the resume to edit it.');
+  } catch (e) {
+    setStatus(e instanceof TypeError ? 'Couldn\'t reach the AI provider. Check your internet connection (or a firewall blocking it).' : e.message, true);
+  } finally { clearInterval(timer); btn.disabled = false; }
+};
+
+/* ---------- render ---------- */
+function h(tag, attrs = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v; else el.setAttribute(k, v === true ? '' : v);
+  }
+  kids.flat().forEach(c => c != null && el.append(c));
+  return el;
+}
+const ed = (tag, key, text, cls) => h(tag, { class: cls, 'data-k': key, contenteditable: 'true', spellcheck: 'true', text: text || '' });
+
+function renderAll() { renderResume(); renderNotes(); $('#emptyState').hidden = true; $('#paperWrap').hidden = false; $('#actions').hidden = false; }
+
+function renderResume() {
+  const p = $('#paper'); p.innerHTML = '';
+  p.append(ed('div', 'name', R.name, 'r-name'));
+  if (R.title) p.append(ed('div', 'title', R.title, 'r-title'));
+  const subBits = [['location', R.location], ['work_authorization', R.work_authorization], ...R.contact.map((c, i) => ['contact.' + i, c])].filter(x => x[1]);
+  if (subBits.length) {
+    const sub = h('div', { class: 'r-sub' });
+    subBits.forEach(([k, v], i) => { if (i) sub.append(h('span', { class: 'sep', text: '|' })); sub.append(ed('span', k, v)); });
+    p.append(sub);
+  }
+  if (R.summary) { p.append(h('div', { class: 'r-h', text: 'Summary' }), ed('p', 'summary', R.summary, 'r-p')); }
+  if (R.skills.length) {
+    p.append(h('div', { class: 'r-h', text: 'Relevant Skills' }));
+    R.skills.forEach((s, i) => p.append(h('div', { class: 'r-skill' },
+      h('button', { class: 'del', 'data-del': 'skills.' + i, contenteditable: 'false', title: 'Remove line', text: '✕' }),
+      ed('b', `skills.${i}.label`, s.label), ': ', ed('span', `skills.${i}.items`, s.items))));
+  }
+  if (R.experience.length) {
+    p.append(h('div', { class: 'r-h', text: 'Professional Experience' }));
+    R.experience.forEach((e, i) => {
+      const job = h('div', { class: 'r-job' });
+      const left = h('span');
+      left.append(ed('span', `experience.${i}.title`, e.title));
+      if (e.company) left.append('  |  ', ed('span', `experience.${i}.company`, e.company));
+      job.append(h('div', { class: 'r-jobhead' }, left, ed('span', `experience.${i}.dates`, e.dates)));
+      if (e.client || e.location) {
+        const meta = h('div', { class: 'r-meta' });
+        if (e.client) meta.append('Client: ', ed('span', `experience.${i}.client`, e.client));
+        if (e.client && e.location) meta.append('  |  ');
+        if (e.location) meta.append(ed('span', `experience.${i}.location`, e.location));
+        job.append(meta);
+      }
+      const ul = h('ul', { class: 'r-ul' });
+      e.bullets.forEach((b, j) => ul.append(h('li', {},
+        h('button', { class: 'del', 'data-del': `experience.${i}.bullets.${j}`, contenteditable: 'false', title: 'Remove bullet', text: '✕' }),
+        ed('span', `experience.${i}.bullets.${j}`, b))));
+      job.append(ul);
+      if (e.environment) job.append(h('div', { class: 'r-env' }, h('b', { text: 'Environment: ' }), ed('span', `experience.${i}.environment`, e.environment)));
+      p.append(job);
+    });
+  }
+  if (R.certifications.length) {
+    p.append(h('div', { class: 'r-h', text: 'Certifications' }));
+    const ul = h('ul', { class: 'r-ul' });
+    R.certifications.forEach((c, i) => ul.append(h('li', {}, ed('span', 'certifications.' + i, c))));
+    p.append(ul);
+  }
+  if (R.education.length) {
+    p.append(h('div', { class: 'r-h', text: 'Education' }));
+    R.education.forEach((c, i) => p.append(ed('p', 'education.' + i, c, 'r-p')));
+  }
+  requestAnimationFrame(updatePageCount);
+}
+
+function setPath(obj, path, val) {
+  const ks = path.split('.'); let o = obj;
+  for (let i = 0; i < ks.length - 1; i++) o = o[isFinite(ks[i]) ? +ks[i] : ks[i]];
+  const last = ks[ks.length - 1]; o[isFinite(last) ? +last : last] = val;
+}
+function delPath(obj, path) {
+  const ks = path.split('.'); const idx = +ks.pop(); let o = obj;
+  ks.forEach(k => o = o[isFinite(k) ? +k : k]); o.splice(idx, 1);
+}
+$('#paper').addEventListener('input', e => {
+  const el = e.target.closest('[data-k]'); if (!el || !R) return;
+  setPath(R, el.dataset.k, el.innerText.replace(/\s+/g, ' ').trim());
+  updatePageCount();
+});
+$('#paper').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('[data-k]')) { e.preventDefault(); e.target.blur(); } });
+$('#paper').addEventListener('paste', e => {
+  if (!e.target.closest('[data-k]')) return;
+  e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text/plain'));
+});
+$('#paper').addEventListener('click', e => { const d = e.target.closest('[data-del]'); if (d) { delPath(R, d.dataset.del); renderResume(); } });
+
+function updatePageCount() {
+  const px = $('#paper').scrollHeight; const pageH = 11 * 96;
+  const n = Math.max(1, Math.ceil((px - 2) / pageH));
+  const el = $('#pagecount');
+  el.textContent = `≈ ${n} page${n > 1 ? 's' : ''}`;
+  el.classList.toggle('over', n > +pages);
+  el.title = n > +pages ? 'Longer than requested. Remove a few bullets (hover a bullet → ✕).' : 'Estimate. Red lines in the preview mark page breaks.';
+}
+
+function renderNotes() {
+  const n = R.notes, box = $('#notesBody'); box.innerHTML = '';
+  const fit = (n.fit || '').toLowerCase();
+  const cls = fit.startsWith('strong') ? 'v-strong' : fit.startsWith('weak') ? 'v-weak' : 'v-partial';
+  box.append(h('div', { class: 'verdict ' + cls }, h('span', { class: 'pill', text: (n.fit || 'Partial') + ' fit' }), h('div', { text: n.verdict || '' })));
+  if (n.requirements.length) {
+    box.append(h('h3', { text: 'Requirements vs. resume' }));
+    const tb = h('tbody');
+    n.requirements.forEach(q => {
+      const m = (q.match || '').toLowerCase();
+      const tag = m === 'yes' ? ['t-yes', 'Yes'] : m === 'no' ? ['t-no', 'No'] : ['t-partial', 'Partial'];
+      tb.append(h('tr', {}, h('td', { text: q.requirement }), h('td', {}, h('span', { class: 'tag ' + tag[0], text: tag[1] })), h('td', { text: q.evidence })));
+    });
+    box.append(h('div', { class: 'table-scroll' }, h('table', { class: 'reqtable' }, h('thead', {}, h('tr', {}, h('th', { text: 'Requirement' }), h('th', { text: 'Match' }), h('th', { text: 'Evidence' }))), tb)));
+  }
+  const list = (title, items) => { if (items.length) box.append(h('h3', { text: title }), h('ul', {}, items.map(t => h('li', { text: t })))); };
+  list('Gaps vs. JD', n.gaps);
+  list('Red flags', n.red_flags);
+  list('Screening questions', n.questions);
+  if (n.cut) box.append(h('h3', { text: 'What was cut' }), h('p', { text: n.cut, style: 'margin:0' }));
+}
+
+/* ---------- tabs ---------- */
+$('#tabs').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  $('#tabs').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  $('#resumePane').hidden = b.dataset.t !== 'resume';
+  $('#notesPane').hidden = b.dataset.t !== 'notes';
+  if (b.dataset.t === 'notes' && !R) $('#notesBody').textContent = 'Recruiter notes appear here after you tailor a resume.';
+};
+
+/* ---------- exports ---------- */
+function fileBase() {
+  const nm = (R.name || 'Candidate').trim().replace(/[^\w\s-]/g, '').split(/\s+/).join('_');
+  const lb = $('#label').value.trim().replace(/[^\w-]+/g, '_');
+  return nm + (lb ? '_' + lb : '');
+}
+function plainText() {
+  const L = [];
+  L.push(R.name); if (R.title) L.push(R.title);
+  const sub = [R.location, R.work_authorization, ...R.contact].filter(Boolean).join(' | '); if (sub) L.push(sub);
+  if (R.summary) L.push('', 'SUMMARY', R.summary);
+  if (R.skills.length) { L.push('', 'RELEVANT SKILLS'); R.skills.forEach(s => L.push(`${s.label}: ${s.items}`)); }
+  if (R.experience.length) {
+    L.push('', 'PROFESSIONAL EXPERIENCE');
+    R.experience.forEach(e => {
+      L.push('', [e.title, e.company].filter(Boolean).join(' | ') + (e.dates ? '    ' + e.dates : ''));
+      const meta = [e.client ? 'Client: ' + e.client : '', e.location].filter(Boolean).join(' | '); if (meta) L.push(meta);
+      e.bullets.filter(Boolean).forEach(b => L.push('• ' + b));
+      if (e.environment) L.push('Environment: ' + e.environment);
+    });
+  }
+  if (R.certifications.length) { L.push('', 'CERTIFICATIONS'); R.certifications.forEach(c => L.push('• ' + c)); }
+  if (R.education.length) { L.push('', 'EDUCATION'); R.education.forEach(c => L.push(c)); }
+  return L.join('\n');
+}
+function notesText() {
+  const n = R.notes, L = [`${R.name} — ${n.fit || ''} fit. ${n.verdict || ''}`];
+  if (n.requirements.length) { L.push('', 'REQUIREMENTS'); n.requirements.forEach(q => L.push(`- ${q.requirement}: ${(q.match || '').toUpperCase()} — ${q.evidence}`)); }
+  [['GAPS', n.gaps], ['RED FLAGS', n.red_flags], ['SCREENING QUESTIONS', n.questions]].forEach(([t, a]) => { if (a.length) { L.push('', t); a.forEach(x => L.push('- ' + x)); } });
+  if (n.cut) L.push('', 'CUT: ' + n.cut);
+  return L.join('\n');
+}
+async function copy(text, btn) {
+  try { await navigator.clipboard.writeText(text); } catch {
+    const ta = h('textarea'); ta.value = text; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  const old = btn.textContent; btn.textContent = 'Copied ✓'; setTimeout(() => btn.textContent = old, 1400);
+}
+$('#copyTxt').onclick = e => copy(plainText(), e.currentTarget);
+$('#copyNotes').onclick = e => R && copy(notesText(), e.currentTarget);
+$('#printPdf').onclick = () => {
+  $('#tabs').querySelector('[data-t=resume]').click();
+  const t = document.title; document.title = fileBase(); window.print(); document.title = t;
+};
+
+$('#dlDocx').onclick = async () => {
+  const { Document, Packer, Paragraph, TextRun, AlignmentType, LevelFormat, BorderStyle, TabStopType } = window.docx;
+  const FONT = 'Calibri', ACCENT = '1F3864', SZ = 20, RIGHT = 12240 - 2 * 864;
+  const run = (text, o = {}) => new TextRun({ text: text || '', font: FONT, size: SZ, ...o });
+  const heading = t => new Paragraph({ spacing: { before: 160, after: 60 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: ACCENT, space: 1 } }, children: [run(t.toUpperCase(), { bold: true, color: ACCENT, size: 22 })] });
+  const bullet = t => new Paragraph({ numbering: { reference: 'b', level: 0 }, spacing: { after: 20 }, children: [run(t)] });
+  const k = [];
+  k.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [run(R.name, { bold: true, size: 32, color: ACCENT })] }));
+  if (R.title) k.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 0 }, children: [run(R.title, { size: 22 })] }));
+  const sub = [R.location, R.work_authorization, ...R.contact].filter(Boolean).join('  |  ');
+  if (sub) k.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [run(sub, { size: 18, color: '555555' })] }));
+  if (R.summary) { k.push(heading('Summary'), new Paragraph({ spacing: { after: 40 }, children: [run(R.summary)] })); }
+  const skills = R.skills.filter(s => s.label || s.items);
+  if (skills.length) { k.push(heading('Relevant Skills')); skills.forEach(s => k.push(new Paragraph({ spacing: { after: 20 }, children: [run((s.label || '') + ': ', { bold: true }), run(s.items)] }))); }
+  if (R.experience.length) {
+    k.push(heading('Professional Experience'));
+    R.experience.forEach(e => {
+      k.push(new Paragraph({ spacing: { before: 100, after: 0 }, keepNext: true, tabStops: [{ type: TabStopType.RIGHT, position: RIGHT }],
+        children: [run([e.title, e.company].filter(Boolean).join('  |  '), { bold: true }), run('\t' + (e.dates || ''), { bold: true })] }));
+      const meta = [e.client ? 'Client: ' + e.client : null, e.location].filter(Boolean).join('  |  ');
+      if (meta) k.push(new Paragraph({ spacing: { after: 20 }, keepNext: true, children: [run(meta, { italics: true, color: '555555' })] }));
+      e.bullets.filter(Boolean).forEach(b => k.push(bullet(b)));
+      if (e.environment) k.push(new Paragraph({ spacing: { before: 20, after: 20 }, children: [run('Environment: ', { bold: true, size: 18 }), run(e.environment, { size: 18 })] }));
+    });
+  }
+  const certs = R.certifications.filter(Boolean), edu = R.education.filter(Boolean);
+  if (certs.length) { k.push(heading('Certifications')); certs.forEach(c => k.push(bullet(c))); }
+  if (edu.length) { k.push(heading('Education')); edu.forEach(c => k.push(new Paragraph({ spacing: { after: 20 }, children: [run(c)] }))); }
+  const doc = new Document({
+    styles: { default: { document: { run: { font: FONT, size: SZ } } } },
+    numbering: { config: [{ reference: 'b', levels: [{ level: 0, format: LevelFormat.BULLET, text: '•', alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 300, hanging: 200 } } } }] }] },
+    sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 720, bottom: 720, left: 864, right: 864 } } }, children: k }],
+  });
+  const blob = await Packer.toBlob(doc);
+  const a = h('a', { href: URL.createObjectURL(blob), download: fileBase() + '.docx' });
+  document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+};
+
+/* first run: nudge to settings */
+if (!cfg.key[cfg.provider]) setStatus('Tip: open ⚙ AI settings once to add your API key.');
+window.__rt = { setResult: r => { R = normalize(r); renderAll(); }, get: () => R };
+})();
+</script>
+</body>
+</html>
